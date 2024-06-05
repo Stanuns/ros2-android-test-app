@@ -38,7 +38,7 @@ public class TalkerNode extends BaseComposableNode {
 
     private void onTimer() {
         std_msgs.msg.String msg = new std_msgs.msg.String();
-        msg.setData("Hello!! my ROS2! galactic! " + this.count);
+        msg.setData("Hello!! my ROS2! Humble! " + this.count);
         this.count++;
         this.publisher.publish(msg);
     }

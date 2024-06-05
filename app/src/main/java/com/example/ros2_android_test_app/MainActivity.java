@@ -2,6 +2,7 @@ package com.example.ros2_android_test_app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
@@ -19,6 +20,8 @@ import android.widget.Toast;
 
 import org.ros2.rcljava.RCLJava;
 
+import geometry_msgs.msg.Vector3;
+
 public class MainActivity extends ROSActivity {
 
     private static final String IS_WORKING_TALKER = "isWorkingTalker";
@@ -34,6 +37,11 @@ public class MainActivity extends ROSActivity {
     private boolean isWorkingListener;
     private boolean isWorkingTalker;
 
+    private JoystickView joystickRight;
+    private ControlNode control_node;
+    private TextView mTextViewLinearVRight;
+    private TextView mTextViewRotationalSRight;
+
     /** Called when the activity is first created. */
     @Override
     public final void onCreate(final Bundle savedInstanceState) {
@@ -45,6 +53,7 @@ public class MainActivity extends ROSActivity {
             isWorkingTalker = savedInstanceState.getBoolean(IS_WORKING_TALKER);
         }
 
+        /**
         Button listenerStartBtn = (Button)findViewById(R.id.listenerStartBtn);
         listenerStartBtn.setOnClickListener(startListenerListener);
         Button listenerStopBtn = (Button)findViewById(R.id.listenerStopBtn);
@@ -57,16 +66,23 @@ public class MainActivity extends ROSActivity {
 
         listenerView = (TextView)findViewById(R.id.listenerTv);
         listenerView.setMovementMethod(new ScrollingMovementMethod());
+         **/
+
+        joystickRight = findViewById(R.id.joystickView_right);
 
         RCLJava.rclJavaInit();
 
         listenerNode =
-                new ListenerNode("ros2galacticnode_listener", "/chatter", listenerView);
+                new ListenerNode("ros2humblenode_listener", "/chatter", listenerView);//ros2galacticnode_listener
 
-        talkerNode = new TalkerNode("ros2galacticnode_talker", "/chatter");
+        talkerNode = new TalkerNode("ros2humblenode_talker", "/chatter");//ros2galacticnode_talker
 
         changeListenerState(false);
         changeTalkerState(false);
+
+        control_node = new ControlNode("HomeRobot_control", "/cmd_vel");
+        getExecutor().addNode(control_node);
+        joyControl();
     }
 
     // Create an anonymous implementation of OnClickListener
@@ -101,10 +117,12 @@ public class MainActivity extends ROSActivity {
 
     private void changeListenerState(boolean isWorking) {
         this.isWorkingListener = isWorking;
+        /**
         Button buttonStart = (Button)findViewById(R.id.listenerStartBtn);
         Button buttonStop = (Button)findViewById(R.id.listenerStopBtn);
         buttonStart.setEnabled(!isWorking);
         buttonStop.setEnabled(isWorking);
+         **/
         if (isWorking){
             getExecutor().addNode(listenerNode);
         } else {
@@ -114,10 +132,12 @@ public class MainActivity extends ROSActivity {
 
     private void changeTalkerState(boolean isWorking) {
         this.isWorkingTalker = isWorking;
+        /**
         Button buttonStart = (Button)findViewById(R.id.talkerStartBtn);
         Button buttonStop = (Button)findViewById(R.id.talkerStopBtn);
         buttonStart.setEnabled(!isWorking);
         buttonStop.setEnabled(isWorking);
+         **/
         if (isWorking){
             getExecutor().addNode(talkerNode);
             talkerNode.start();
@@ -137,5 +157,32 @@ public class MainActivity extends ROSActivity {
             outState.putBoolean(IS_WORKING_TALKER, isWorkingTalker);
         }
         super.onSaveInstanceState(outState);
+    }
+
+
+
+    @SuppressLint("DefaultLocale")
+    private void joyControl(){
+        mTextViewLinearVRight = findViewById(R.id.textView2);
+        mTextViewRotationalSRight = findViewById(R.id.textView3);
+        joystickRight = findViewById(R.id.joystickView_right);
+        joystickRight.setOnMoveListener((angle, strength) -> {
+            //手动设置最大线速度与角速度
+            double max_v = 0.8;//m/s
+            double max_a = 0.6;//rad/s
+            double now_v = max_v * Math.sin(angle*Math.PI/180) * strength/100; //当前摇杆所推力度对应速度值
+            double now_a = max_a * Math.cos(angle*Math.PI/180) * strength/100;
+
+            Vector3 vec_lv = new Vector3();
+            Vector3 vec_av = new Vector3();
+//            vec_lv.setX(-now_v);
+//            vec_av.setZ(-now_a);
+            vec_lv.setX(now_v);
+            vec_av.setZ(now_a);
+
+            control_node.pubVelocity(vec_lv, vec_av);
+            mTextViewLinearVRight.setText(String.format("Current linear velocity:%1$.2f m/s ", now_v));
+            mTextViewRotationalSRight.setText(String.format("Current rotational speed:%1$.2f rad/s ", now_a));
+        });
     }
 }
