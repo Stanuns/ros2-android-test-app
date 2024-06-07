@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,12 @@ public class MainActivity extends ROSActivity {
     private ControlNode control_node;
     private TextView mTextViewLinearVRight;
     private TextView mTextViewRotationalSRight;
+
+    private PlayerView exoPlayerView;
+    private MediaSource mediaSource;
+    private ExoPlayer player;
+
+    private EditText rtsp_url;
 
     /** Called when the activity is first created. */
     @OptIn(markerClass = UnstableApi.class) @Override
@@ -96,12 +103,12 @@ public class MainActivity extends ROSActivity {
         joyControl();
 
         String rtspUri = "rtsp://192.168.64.121:8554/front";
-        PlayerView exoPlayerView = findViewById(R.id.exo_player);
+        exoPlayerView = findViewById(R.id.exo_player);
         // Create an RTSP media source pointing to an RTSP uri.
-        MediaSource mediaSource =
+        mediaSource =
                 new RtspMediaSource.Factory().createMediaSource(MediaItem.fromUri(rtspUri));
         // Create a player instance.
-        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this).build();
         // Set the media source to be played.
         player.setMediaSource(mediaSource);
         // Prepare the player.
@@ -109,8 +116,32 @@ public class MainActivity extends ROSActivity {
         exoPlayerView.setPlayer(player);
         player.play();
 
+        Button setRtspUrlBtn = (Button)findViewById(R.id.rtsp_url_btn);
+        rtsp_url = findViewById(R.id.rtsp_url);
+        setRtspUrlBtn.setOnClickListener(setRtspUrlListener);
+//        setRtspUrlBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String newRtspUri = rtsp_url.getText().toString();
+//                //Log.e("cs","new rtsp url:"+newRtspUri);
+//            }
+//        });
 
     }
+
+    private OnClickListener setRtspUrlListener = new OnClickListener() {
+        @OptIn(markerClass = UnstableApi.class) public void onClick(final View view) {
+            String newRtspUri = rtsp_url.getText().toString();
+            player.stop();
+            mediaSource =
+                    new RtspMediaSource.Factory().createMediaSource(MediaItem.fromUri(newRtspUri));
+            // Set the media source to be played.
+            player.setMediaSource(mediaSource);
+            player.prepare();
+            exoPlayerView.setPlayer(player);
+            player.play();
+        }
+    };
 
     // Create an anonymous implementation of OnClickListener
     private OnClickListener startListenerListener = new OnClickListener() {
