@@ -1,6 +1,17 @@
 package com.example.ros2_android_test_app;
 
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.RawResourceDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.rtsp.RtspMediaSource;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.ui.PlayerView;
+
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -43,7 +54,7 @@ public class MainActivity extends ROSActivity {
     private TextView mTextViewRotationalSRight;
 
     /** Called when the activity is first created. */
-    @Override
+    @OptIn(markerClass = UnstableApi.class) @Override
     public final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -83,6 +94,22 @@ public class MainActivity extends ROSActivity {
         control_node = new ControlNode("HomeRobot_control", "/cmd_vel");
         getExecutor().addNode(control_node);
         joyControl();
+
+        String rtspUri = "rtsp://192.168.64.121:8554/front";
+        PlayerView exoPlayerView = findViewById(R.id.exo_player);
+        // Create an RTSP media source pointing to an RTSP uri.
+        MediaSource mediaSource =
+                new RtspMediaSource.Factory().createMediaSource(MediaItem.fromUri(rtspUri));
+        // Create a player instance.
+        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        // Set the media source to be played.
+        player.setMediaSource(mediaSource);
+        // Prepare the player.
+        player.prepare();
+        exoPlayerView.setPlayer(player);
+        player.play();
+
+
     }
 
     // Create an anonymous implementation of OnClickListener

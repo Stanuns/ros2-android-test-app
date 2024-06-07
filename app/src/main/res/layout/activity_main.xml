@@ -59,6 +59,16 @@
         app:layout_constraintTop_toBottomOf="@+id/listenerStopBtn" />
     -->
 
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/exo_player"
+        android:layout_width="387dp"
+        android:layout_height="294dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginBottom="405dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.example.ros2_android_test_app.JoystickView
         android:id="@+id/joystickView_right"
         android:layout_width="250dp"
