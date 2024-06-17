@@ -7,6 +7,7 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.RawResourceDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.rtsp.RtspMediaSource;
 import androidx.media3.exoplayer.source.MediaSource;
@@ -34,7 +35,7 @@ import org.ros2.rcljava.RCLJava;
 
 import geometry_msgs.msg.Vector3;
 
-public class MainActivity extends ROSActivity {
+@UnstableApi public class MainActivity extends ROSActivity {
 
     private static final String IS_WORKING_TALKER = "isWorkingTalker";
     private static final String IS_WROKING_LISTENER = "isWorkingListener";
@@ -57,6 +58,7 @@ public class MainActivity extends ROSActivity {
     private PlayerView exoPlayerView;
     private MediaSource mediaSource;
     private ExoPlayer player;
+    private DefaultLoadControl customLoadControl;
 
     private EditText rtsp_url;
 
@@ -102,13 +104,19 @@ public class MainActivity extends ROSActivity {
         getExecutor().addNode(control_node);
         joyControl();
 
-        String rtspUri = "rtsp://192.168.64.121:8554/front";
+        String rtspUri = "rtsp://192.168.251.121:8554/front";
         exoPlayerView = findViewById(R.id.exo_player);
         // Create an RTSP media source pointing to an RTSP uri.
         mediaSource =
                 new RtspMediaSource.Factory().createMediaSource(MediaItem.fromUri(rtspUri));
+        // reduce rtsp time latency
+        customLoadControl = new DefaultLoadControl.Builder()
+                .setBufferDurationsMs(200, 300, 100, 100)
+                .build();
         // Create a player instance.
-        player = new ExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this).setLoadControl(customLoadControl).build();
+//        player = new ExoPlayer.Builder(this).build();
+
         // Set the media source to be played.
         player.setMediaSource(mediaSource);
         // Prepare the player.
