@@ -244,7 +244,7 @@ import geometry_msgs.msg.Vector3;
 //            vec_lv.setX(-now_v);
 //            vec_av.setZ(-now_a);
             vec_lv.setX(now_v);
-            vec_av.setZ(now_a);
+            vec_av.setZ(-now_a);
 
             control_node.pubVelocity(vec_lv, vec_av);
             mTextViewLinearVRight.setText(String.format("Current linear velocity:%1$.2f m/s ", now_v));

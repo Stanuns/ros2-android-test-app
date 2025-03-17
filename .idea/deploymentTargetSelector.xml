@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-06-17T02:05:22.856676966Z">
+        <DropdownSelection timestamp="2025-03-17T06:50:08.900609957Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=e1a5b29d" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/sunwei/.android/avd/Pixel_3a_API_34.avd" />
             </handle>
           </Target>
         </DropdownSelection>
